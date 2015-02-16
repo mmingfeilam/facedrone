@@ -37,7 +37,7 @@
 
   CF.prototype.keyPress = function(ev) {
     console.log("Keypress: " + ev.keyCode);
-    if (ev.keyCode != 102) {
+    if (ev.keyCode != 109) {
       return;
     }
 
