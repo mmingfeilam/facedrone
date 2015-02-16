@@ -1,4 +1,7 @@
 var cv = require('opencv');
+var gm = require('gm');
+var imagick = require('imagemagick');
+
 var fs    = require('fs')
   , path  = require('path')
   , async = require('async')
@@ -14,7 +17,8 @@ var tracking = false;
 var debug = true;
 var processingImage = false;
 var face_cascade = new cv.CascadeClassifier(path.join(__dirname,'node_modules','opencv','data','haarcascade_frontalface_alt2.xml'));
-
+var saveImagePath = '/Users/212353126/Documents/Hack/test.jpg';
+var saveCroppedImagePath = '/Users/212353126/Documents/Hack/cropped.jpg';
 
 /** 
  *  Controllers initialization.
@@ -61,9 +65,26 @@ function detectFaces() {
           cb(err, faces, im);
         }, opts.scale, opts.neighbors
          , opts.min && opts.min[0], opts.min && opts.min[1]);
+         
+
+		
+//		console.log("copterface", "trainingData length: " + trainingData.length);
+//		console.log("copterface", "createFisherFaceRecognizer");
+//		var facerec = cv.FaceRecognizer.createLBPHFaceRecognizer();
+//		console.log("copterface", "before trainSync");
+//  		facerec.trainSync(trainingData);
+//  		console.log("copterface", "after trainSync");
+//  		
+//  		console.log("copterface", "im size: " + im.length);
+//  		
+//  		var whoisit = facerec.predictSync(im);
+//  		console.log('the person is: ' + whoisit.id); 
+//  		console.log('the confidence level is: ' + whoisit.confidence); 
+  		
       },
       function(faces, im, cb) {
-      	var im2 = im;
+      	//var im2 = im;
+      	
       	console.log("copterface", "analyze face");
         // 4. Analyze faces
         var face;
@@ -76,7 +97,80 @@ function detectFaces() {
         }
 
         if( biggestFace ) {
-        	var userName = "mike";
+        		console.log("copterface", "biggest face");
+	        	var userName = '';
+	        	var imag = null;
+	        	
+	        	console.log("copterface", "save img");
+	      	im.save(saveImagePath);
+	      		
+	      	console.log("copterface", "read back saved img");
+//	        	cv.readImage( saveImagePath, function(err, saveImg) {
+		    		console.log("copterface", "crop and save cropped img");
+		      		gm(saveImagePath)
+			      		.crop(face.width, face.height, face.x, face.y)
+			      		.resize('100', '100', '^')
+			      		.write(saveCroppedImagePath, function(err)
+			      		{
+			      			console.log("copterface", "inside crop and save cropped img");
+			      			if (err) {
+			      				console.log('error occurred: ' + err);
+			      			}
+			      		});
+		      	
+//		    gm(saveImagePath)
+//		    		.resize('100', '100', '^')
+//		      	  .gravity('Center')
+//		      	  .crop('100', '100')
+//		      	  .write(saveCroppedImagePath, function (err) {
+//		      	    if (!err) console.log(' hooray! ');
+//		      	  });
+//	        	});
+		    		
+//	    		imagick.crop({
+//	    		    srcPath: saveImagePath,
+//	    		    dstPath: saveCroppedImagePath,
+//	    		    width: 100,
+//	    		    height: 100,
+//	    		    quality: 1,
+//	    		    gravity: 'Center'
+//	    		}, function(err, stdout, stderr){
+//	    		    if (err) throw err;
+////	    		    console.log('resized ' + process.argv[2].split('/').pop() + ' to fit within 200x200px');
+//	    		});
+	        	
+	        console.log("copterface", "face recognition");
+	        var trainingData = [];
+
+	    		// Collect all the images we are going to use to test the algorithm
+	    		// ".pgm" are grey scale images
+	    		for (var i = 1; i<7; i++){
+	      			trainingData.push([1,"/Users/212353126/Documents/Hack/Samples/yash" + i + ".jpg" ]);
+	    		}
+	    		
+	    		for (var j = 1; j<10; j++){
+	      			trainingData.push([2,"/Users/212353126/Documents/Hack/Samples/lam" + j + ".jpg" ]);
+	    		}
+	    		
+	    		for (var j = 1; j<10; j++){
+	      			trainingData.push([3,"/Users/212353126/Documents/Hack/Samples/angelina" + j + ".jpg" ]);
+	    		}
+	    		
+	    		
+	    		
+	    		// Test algorithm
+	    		cv.readImage(saveCroppedImagePath, function(e, im1){
+	    //cv.readImage("/Users/212353126/Documents/Hack/2015-02-15_2058.png", function(e, im1){
+
+	    			var facerec1 = cv.FaceRecognizer.createFisherFaceRecognizer();
+	    			facerec1.trainSync(trainingData);
+
+	    			// Try to recognize the person in "s2_2.pgm" against the "s1" folder tests
+	    			userName = '';
+	    			userName = facerec1.predictSync(im1).id;
+	    			console.log("test face recognition with live image: " + userName);
+	    		});
+		  
           face = biggestFace;
           io.sockets.emit('face', { x: face.x, y: face.y, w: face.width, h: face.height, iw: im.width(), ih: im.height(), user: userName });
 
@@ -162,6 +256,19 @@ function detectFaces() {
   } else {
     if (tracking) setTimeout(detectFaces, DT);
   };
+};
+
+var saveImage=function(im){
+    im.write(saveImagePath, function (err) {
+        if (err){
+            console.log(err);
+            next(connection,true);
+        } else {
+            var img = fs.readFileSync(saveImagePath);
+            res.writeHead(200, {'Content-Type': 'image/'+type});
+            res.end(img, 'binary');
+        }
+    });
 };
 
 function copterface(name, deps) {
