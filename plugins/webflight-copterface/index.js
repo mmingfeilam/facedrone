@@ -1,7 +1,7 @@
 var cv = require('opencv');
 var gm = require('gm');
 var imagick = require('imagemagick');
-var mailer = require("nodemailer");
+//var mailer = require("nodemailer");
 
 var fs    = require('fs')
   , path  = require('path')
