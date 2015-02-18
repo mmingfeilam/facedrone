@@ -1,6 +1,7 @@
 var cv = require('opencv');
 var gm = require('gm');
 var imagick = require('imagemagick');
+var mailer = require("nodemailer");
 
 var fs    = require('fs')
   , path  = require('path')
@@ -65,22 +66,6 @@ function detectFaces() {
           cb(err, faces, im);
         }, opts.scale, opts.neighbors
          , opts.min && opts.min[0], opts.min && opts.min[1]);
-         
-
-		
-//		console.log("copterface", "trainingData length: " + trainingData.length);
-//		console.log("copterface", "createFisherFaceRecognizer");
-//		var facerec = cv.FaceRecognizer.createLBPHFaceRecognizer();
-//		console.log("copterface", "before trainSync");
-//  		facerec.trainSync(trainingData);
-//  		console.log("copterface", "after trainSync");
-//  		
-//  		console.log("copterface", "im size: " + im.length);
-//  		
-//  		var whoisit = facerec.predictSync(im);
-//  		console.log('the person is: ' + whoisit.id); 
-//  		console.log('the confidence level is: ' + whoisit.confidence); 
-  		
       },
       function(faces, im, cb) {
       	//var im2 = im;
@@ -105,45 +90,22 @@ function detectFaces() {
 	      	im.save(saveImagePath);
 	      		
 	      	console.log("copterface", "read back saved img");
-//	        	cv.readImage( saveImagePath, function(err, saveImg) {
-		    		console.log("copterface", "crop and save cropped img");
-		      		gm(saveImagePath)
-			      		.crop(face.width, face.height, face.x, face.y)
-			      		.resize('100', '100', '^')
-			      		.write(saveCroppedImagePath, function(err)
-			      		{
-			      			console.log("copterface", "inside crop and save cropped img");
-			      			if (err) {
-			      				console.log('error occurred: ' + err);
-			      			}
-			      		});
-		      	
-//		    gm(saveImagePath)
-//		    		.resize('100', '100', '^')
-//		      	  .gravity('Center')
-//		      	  .crop('100', '100')
-//		      	  .write(saveCroppedImagePath, function (err) {
-//		      	    if (!err) console.log(' hooray! ');
-//		      	  });
-//	        	});
-		    		
-//	    		imagick.crop({
-//	    		    srcPath: saveImagePath,
-//	    		    dstPath: saveCroppedImagePath,
-//	    		    width: 100,
-//	    		    height: 100,
-//	    		    quality: 1,
-//	    		    gravity: 'Center'
-//	    		}, function(err, stdout, stderr){
-//	    		    if (err) throw err;
-////	    		    console.log('resized ' + process.argv[2].split('/').pop() + ' to fit within 200x200px');
-//	    		});
+	    		console.log("copterface", "crop and save cropped img");
+      		gm(saveImagePath)
+	      		.crop(face.width, face.height, face.x, face.y)
+	      		.resize('100', '100', '^')
+	      		.write(saveCroppedImagePath, function(err)
+	      		{
+	      			console.log("copterface", "inside crop and save cropped img");
+	      			if (err) {
+	      				console.log('error occurred: ' + err);
+	      			}
+	      		});
 	        	
 	        console.log("copterface", "face recognition");
 	        var trainingData = [];
 
-	    		// Collect all the images we are going to use to test the algorithm
-	    		// ".pgm" are grey scale images
+	    		// Collect all the images we are going to use to train the algorithm
 	    		for (var i = 1; i<7; i++){
 	      			trainingData.push([1,"/Users/212353126/Documents/Hack/Samples/yash" + i + ".jpg" ]);
 	    		}
@@ -156,21 +118,34 @@ function detectFaces() {
 	      			trainingData.push([3,"/Users/212353126/Documents/Hack/Samples/angelina" + j + ".jpg" ]);
 	    		}
 	    		
-	    		
-	    		
 	    		// Test algorithm
-	    		cv.readImage(saveCroppedImagePath, function(e, im1){
+	    		cv.readImage(saveCroppedImagePath, function(e, im1) {
 	    //cv.readImage("/Users/212353126/Documents/Hack/2015-02-15_2058.png", function(e, im1){
 
 	    			var facerec1 = cv.FaceRecognizer.createFisherFaceRecognizer();
 	    			facerec1.trainSync(trainingData);
 
-	    			// Try to recognize the person in "s2_2.pgm" against the "s1" folder tests
+	    			// Try to recognize the person 
 	    			userName = '';
-	    			userName = facerec1.predictSync(im1).id;
+	    			var userId = '';
+	    			userId = facerec1.predictSync(im1).id;
+	    			
+	    			switch(userId) {
+	    			case 1:
+	    				userName = "Yash";
+	    				break;
+	    			case 2:
+	    				userName = "Mike";
+	    				break;
+	    			case 3:
+	    				userName = "Angelina";
+	    				break;
+	    			default:
+	    				break;
+	    			}
 	    			console.log("test face recognition with live image: " + userName);
 	    		});
-		  
+	    		
           face = biggestFace;
           io.sockets.emit('face', { x: face.x, y: face.y, w: face.width, h: face.height, iw: im.width(), ih: im.height(), user: userName });
 
@@ -211,44 +186,6 @@ function detectFaces() {
         processingImage = false;
         cb(null, dt);
       }
-      /*function(faces, im2, cb) {
-      	console.log("copterface", "face recognition");
-      	var trainingData = [];
-
-		console.log("copterface", "first loop");
-		// Collect all the images we are going to use to test the algorithm
-		// ".pgm" are grey scale images
-		for (var i = 1; i<7; i++){
-  			trainingData.push([1,"/Users/212353126/Documents/Hack/Samples/yash" + i + ".jpg" ]);
-		}
-		
-		console.log("copterface", "second loop");
-		for (var j = 1; j<6; j++){
-  			trainingData.push([2,"/Users/212353126/Documents/Hack/Samples/angelina" + j + ".jpg" ]);
-		}
-		
-		console.log("copterface", "second loop");
-		for (var j = 1; j<6; j++){
-  			trainingData.push([3,"/Users/212353126/Documents/Hack/Samples/lam" + j + ".jpg" ]);
-		}
-		
-		console.log("copterface", "trainingData length: " + trainingData.length);
-		console.log("copterface", "createFisherFaceRecognizer");
-		var facerec = cv.FaceRecognizer.createLBPHFaceRecognizer();
-		console.log("copterface", "before trainSync");
-  		facerec.trainSync(trainingData);
-  		console.log("copterface", "after trainSync");
-  		
-  		console.log("copterface", "im2 size: " + im2.length);
-  		
-  		var whoisit = facerec.predictSync(im2);
-  		console.log('the person is: ' + whoisit.id);
-      	
-      	//var cv1 = require('node_modules/lib/opencv');
-      	//var model = fs.createFisherFaceRecognizer();
-      	//cv1.Point pt;
-      	//cv1.Matrix matrix;
-      }*/
     ], function(err, dt) {
       dt = Math.max(dt, DT);
       setTimeout(detectFaces, dt);
