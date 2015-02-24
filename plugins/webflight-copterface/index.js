@@ -42,7 +42,7 @@ function detectFaces() {
 
     async.waterfall([
       function(cb) {
-      	console.log("/copterface", "stop drone before taking pic");
+//      	console.log("/copterface", "stop drone before taking pic");
         // 1. Stop the Drone before taking picture
         client.stop();
         setTimeout(function() { // wait the drone stabilization for a new image
@@ -70,7 +70,7 @@ function detectFaces() {
       function(faces, im, cb) {
       	//var im2 = im;
       	
-      	console.log("copterface", "analyze face");
+//      	console.log("copterface", "analyze face");
         // 4. Analyze faces
         var face;
         var biggestFace;
@@ -102,7 +102,7 @@ function detectFaces() {
 	      			}
 	      		});
 	        	
-	        console.log("copterface", "face recognition");
+//	        console.log("copterface", "face recognition");
 	        var trainingData = [];
 
 	    		// Collect all the images we are going to use to train the algorithm
@@ -147,8 +147,11 @@ function detectFaces() {
 	    		});
 	    		
           face = biggestFace;
+          
+          if(userName !== '') {
           io.sockets.emit('face', { x: face.x, y: face.y, w: face.width, h: face.height, iw: im.width(), ih: im.height(), user: userName });
-
+          }
+          
           face.centerX = face.x + face.width * 0.5;
           face.centerY = face.y + face.height * 0.5;
 

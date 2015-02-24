@@ -10,14 +10,14 @@ PILOT_ACCELERATION = 0.04;
           , backward = 's'
           , left     = 'a'
           , right    = 'd'
-          , flip     = 'f'
+//          , flip     = 'f'
           , channel  = 'c'
           ;
         if      (options && options.keyboard === 'qwerty') { }
         else if (options && options.keyboard === 'azerty') {
-          forward  = 'z';
+          forward  = 'w';
           backward = 's';
-          left     = 'q';
+          left     = 'a';
           right    = 'd';
         }
 

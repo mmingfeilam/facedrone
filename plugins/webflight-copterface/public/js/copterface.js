@@ -4,7 +4,7 @@
   var CF;
 
   CF = function CopterFace(cockpit) {
-    console.log("Loading Copterface plugin.");
+//    console.log("Loading Copterface plugin.");
 
     // Instance variables
     this.cockpit = cockpit;
@@ -36,7 +36,7 @@
   };
 
   CF.prototype.keyPress = function(ev) {
-    console.log("Keypress: " + ev.keyCode);
+//    console.log("Keypress: " + ev.keyCode);
     if (ev.keyCode != 109) {
       return;
     }
