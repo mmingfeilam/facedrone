@@ -52,14 +52,14 @@ function detectFaces() {
         }, 200);
       },
       function(cb) {
-      	console.log("/copterface", "read image");
+//      	console.log("/copterface", "read image");
         // 2. Read picture (takes between 60 and 100 ms)
         cv.readImage( lastPng, function(err, im) {
           cb(err,im);
         });
       },
       function(im, cb) {
-      	console.log("/copterface", "face detect");
+//      	console.log("/copterface", "face detect");
         // 3. Detect faces (takes between 200 and 250 ms)
         var opts = {};
         face_cascade.detectMultiScale(im, function(err, faces) {
@@ -82,21 +82,22 @@ function detectFaces() {
         }
 
         if( biggestFace ) {
-        		console.log("copterface", "biggest face");
+//        		console.log("copterface", "biggest face");
 	        	var userName = '';
+	        	var confidenceLevel = '';
 	        	var imag = null;
 	        	
-	        	console.log("copterface", "save img");
+//	        	console.log("copterface", "save img");
 	      	im.save(saveImagePath);
 	      		
-	      	console.log("copterface", "read back saved img");
-	    		console.log("copterface", "crop and save cropped img");
+//	      	console.log("copterface", "read back saved img");
+//	    		console.log("copterface", "crop and save cropped img");
       		gm(saveImagePath)
 	      		.crop(face.width, face.height, face.x, face.y)
 	      		.resize('100', '100', '^')
 	      		.write(saveCroppedImagePath, function(err)
 	      		{
-	      			console.log("copterface", "inside crop and save cropped img");
+//	      			console.log("copterface", "inside crop and save cropped img");
 	      			if (err) {
 	      				console.log('error occurred: ' + err);
 	      			}
@@ -106,16 +107,20 @@ function detectFaces() {
 	        var trainingData = [];
 
 	    		// Collect all the images we are going to use to train the algorithm
+//	    		for (var i = 1; i<7; i++){
+//	      			trainingData.push([1,"/Users/212353126/Documents/Hack/Samples/yash" + i + ".jpg" ]);
+//	    		}
+	    		
+	    		for (var j = 1; j<10; j++){
+	      			trainingData.push([1,"/Users/212353126/Documents/Hack/Samples/lam" + j + ".jpg" ]);
+	    		}
+	    		
+	    		for (var j = 1; j<11; j++){
+	      			trainingData.push([2,"/Users/212353126/Documents/Hack/Samples/sean_" + j + ".jpg" ]);
+	    		}
+	    		
 	    		for (var i = 1; i<7; i++){
-	      			trainingData.push([1,"/Users/212353126/Documents/Hack/Samples/yash" + i + ".jpg" ]);
-	    		}
-	    		
-	    		for (var j = 1; j<10; j++){
-	      			trainingData.push([2,"/Users/212353126/Documents/Hack/Samples/lam" + j + ".jpg" ]);
-	    		}
-	    		
-	    		for (var j = 1; j<10; j++){
-	      			trainingData.push([3,"/Users/212353126/Documents/Hack/Samples/angelina" + j + ".jpg" ]);
+      			trainingData.push([3,"/Users/212353126/Documents/Hack/Samples/angelina" + i + ".jpg" ]);
 	    		}
 	    		
 	    		// Test algorithm
@@ -128,20 +133,26 @@ function detectFaces() {
 	    			// Try to recognize the person 
 	    			userName = '';
 	    			var userId = '';
-	    			userId = facerec1.predictSync(im1).id;
+	    			var prediction = facerec1.predictSync(im1);
+	    			userId = prediction.id;
 	    			
-	    			switch(userId) {
-	    			case 1:
-	    				userName = "Yash";
-	    				break;
-	    			case 2:
-	    				userName = "Mike";
-	    				break;
-	    			case 3:
-	    				userName = "Angelina";
-	    				break;
-	    			default:
-	    				break;
+	    			confidenceLevel = parseFloat(prediction.confidence);
+	    			
+	    			if(confidenceLevel > 1000.0) {
+		    			switch(userId) {
+		    			case 2:
+		    				userName = "Sean";
+		    				break;
+		    			case 1:
+		    				userName = "Mike";
+		    				break;
+		    			case 3:
+		    				userName = "Angelina";
+		    				break;
+		    			default:
+		    				userName = '';
+		    				break;
+		    			}
 	    			}
 	    			console.log("test face recognition with live image: " + userName);
 	    		});
@@ -149,15 +160,32 @@ function detectFaces() {
           face = biggestFace;
           
           if(userName !== '') {
-          io.sockets.emit('face', { x: face.x, y: face.y, w: face.width, h: face.height, iw: im.width(), ih: im.height(), user: userName });
+        	  	io.sockets.emit('face', { x: face.x, y: face.y, w: face.width, h: face.height, iw: im.width(), ih: im.height(), user: userName, confidence: confidenceLevel });
           }
           
-          face.centerX = face.x + face.width * 0.5;
-          face.centerY = face.y + face.height * 0.5;
-
-          var centerX = im.width() * 0.5;
-          var centerY = im.height() * 0.5;
-
+//          face.centerX = face.x + face.width * 0.5;
+//          face.centerY = face.y + face.height * 0.5;
+//
+//          var centerX = im.width() * 0.5;
+//          var centerY = im.height() * 0.5;
+//          
+//          console.log('face centerX: ' + face.centerX);
+//          console.log('canvas centerX: ' + centerX);
+//          
+//          if(centerX > face.centerX) {
+//        	  	console.log('move left');
+//          } else if(centerX < face.centerX) {
+//        	  	console.log('move right');
+//          }
+//          
+//          console.log('face centerY: ' + face.centerY);
+//          console.log('canvas centerY: ' + centerY);
+//          if(centerY > face.centerY) {
+//      	  	console.log('move up');
+//	      } else if(centerY < face.centerY) {
+//	      	console.log('move down');
+//	      }
+          
           var heightAmount = -( face.centerY - centerY ) / centerY;
           var turnAmount = -( face.centerX - centerX ) / centerX;
 
