@@ -1,3 +1,5 @@
+var MIN_FACE_WIDTH = 150;
+
 var cv = require('opencv');
 var gm = require('gm');
 var imagick = require('imagemagick');
@@ -17,7 +19,7 @@ var client, io, lastPng;
 var tracking = false;
 var debug = true;
 var processingImage = false;
-var face_cascade = new cv.CascadeClassifier(path.join(__dirname,'node_modules','opencv','data','haarcascade_frontalface_alt2.xml'));
+var face_cascade = new cv.CascadeClassifier(path.join(__dirname,'node_modules','opencv','data','haarcascade_profileface.xml'));
 var saveImagePath = '/Users/212353126/Documents/Hack/test.jpg';
 var saveCroppedImagePath = '/Users/212353126/Documents/Hack/cropped.jpg';
 
@@ -115,13 +117,29 @@ function detectFaces() {
 	      			trainingData.push([1,"/Users/212353126/Documents/Hack/Samples/lam" + j + ".jpg" ]);
 	    		}
 	    		
-	    		for (var j = 1; j<11; j++){
+//	    		for (var j = 1; j<10; j++){
+//	      			trainingData.push([1,"/Users/212353126/Documents/Hack/Samples/lam" + j + " copy.jpg" ]);
+//	    		}
+	    		
+//	    		for (var j = 20; j<26; j++){
+//	      			trainingData.push([1,"/Users/212353126/Documents/Hack/Samples/lam" + j + ".jpg" ]);
+//	    		}
+	    		
+	    		for (var j = 1; j<12; j++){
+	      			trainingData.push([2,"/Users/212353126/Documents/Hack/Samples/sean_" + j + "a.jpg" ]);
+	    		}
+	    		
+	    		for (var j = 1; j<12; j++){
 	      			trainingData.push([2,"/Users/212353126/Documents/Hack/Samples/sean_" + j + ".jpg" ]);
 	    		}
 	    		
-	    		for (var i = 1; i<7; i++){
-      			trainingData.push([3,"/Users/212353126/Documents/Hack/Samples/angelina" + i + ".jpg" ]);
+	    		for (var j = 1; j<13; j++){
+	      			trainingData.push([2,"/Users/212353126/Documents/Hack/Samples/sean_" + j + "b.jpg" ]);
 	    		}
+	    		
+//	    		for (var i = 1; i<7; i++){
+//      			trainingData.push([3,"/Users/212353126/Documents/Hack/Samples/angelina" + i + ".jpg" ]);
+//	    		}
 	    		
 	    		// Test algorithm
 	    		cv.readImage(saveCroppedImagePath, function(e, im1) {
@@ -138,7 +156,7 @@ function detectFaces() {
 	    			
 	    			confidenceLevel = parseFloat(prediction.confidence);
 	    			
-	    			if(confidenceLevel > 1000.0) {
+	    			if(confidenceLevel > 1500.0) {
 		    			switch(userId) {
 		    			case 2:
 		    				userName = "Sean";
@@ -155,19 +173,25 @@ function detectFaces() {
 		    			}
 	    			}
 	    			console.log("test face recognition with live image: " + userName);
+	    			console.log("face.width: " + face.width);
+	    			console.log("face.height: " + face.height);
+	    			console.log("im.width(): " + im.width());
+	    			console.log("im.height(): " + im.height());
 	    		});
 	    		
           face = biggestFace;
           
-          if(userName !== '') {
+          if(userName !== '' && face.width > MIN_FACE_WIDTH) {
         	  	io.sockets.emit('face', { x: face.x, y: face.y, w: face.width, h: face.height, iw: im.width(), ih: im.height(), user: userName, confidence: confidenceLevel });
+          } else {
+        	  	io.sockets.emit('clear_face');
           }
           
-//          face.centerX = face.x + face.width * 0.5;
-//          face.centerY = face.y + face.height * 0.5;
-//
-//          var centerX = im.width() * 0.5;
-//          var centerY = im.height() * 0.5;
+          face.centerX = face.x + face.width * 0.5;
+          face.centerY = face.y + face.height * 0.5;
+
+          var centerX = im.width() * 0.5;
+          var centerY = im.height() * 0.5;
 //          
 //          console.log('face centerX: ' + face.centerX);
 //          console.log('canvas centerX: ' + centerX);

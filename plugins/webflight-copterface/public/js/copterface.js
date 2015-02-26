@@ -1,5 +1,5 @@
-var ACCELERATION = 0.1;
-var DIFFERENCE_LIMIT = 10;
+var ACCELERATION = 0.5;
+var DIFFERENCE_LIMIT = 5;
 (function (window, undefined) {
   'use strict';
 
@@ -26,6 +26,10 @@ var DIFFERENCE_LIMIT = 10;
         });
       }
     });
+    
+    this.cockpit.socket.on('clear_face', function() {
+    		self.clear();
+	  });
 
     // Bind on window events to resize
     $(window).resize(function(event) {
@@ -87,14 +91,20 @@ var DIFFERENCE_LIMIT = 10;
     this.ctx.restore();
     this.cockpit.socket.emit("/copterface", "strokeRect3");
     
-    var faceCenterX = data.x + data.width * 0.5;
-    var faceCenterY = data.y + data.height * 0.5;
+    var faceCenterX = data.x + data.w * 0.5;
+    var faceCenterY = data.y + data.h * 0.5;
 
     var centerX = data.iw * 0.5;
     var centerY = data.ih * 0.5;
     
-    console.log('face centerX: ' + faceCenterX);
-    console.log('canvas centerX: ' + centerX);
+    this.cockpit.socket.emit("/copterface", 'face centerX: ' + faceCenterX);
+    this.cockpit.socket.emit("/copterface", 'face centerY: ' + faceCenterY);
+    this.cockpit.socket.emit("/copterface", 'canvas centerX: ' + centerX);
+    this.cockpit.socket.emit("/copterface", 'canvas centerY: ' + centerY);
+    this.cockpit.socket.emit("/copterface", 'square width: ' + w);
+    this.cockpit.socket.emit("/copterface", 'square height: ' + h);
+    this.cockpit.socket.emit("/copterface", 'canvas width: ' + cw);
+    this.cockpit.socket.emit("/copterface", 'canvas height: ' + ch);
     
     var cmd = {};
     cmd.ev = 'move';
@@ -104,28 +114,28 @@ var DIFFERENCE_LIMIT = 10;
     diffX = Math.abs(centerX - faceCenterX);
     diffY = Math.abs(centerY - faceCenterY);
     
+    this.cockpit.socket.emit("/copterface", 'diffX: ' + diffX);
+    this.cockpit.socket.emit("/copterface", 'diffY: ' + diffY);
+    
     // Only move if the difference > DIFFERENCE_LIMIT
     if(diffX > DIFFERENCE_LIMIT) {
 	    if(centerX > faceCenterX) {
-    			console.log('move left');
+	    	this.cockpit.socket.emit("/copterface",'move left');
     			cmd.action = 'left';
 	    } else if(centerX < faceCenterX) {
-  	  		console.log('move right');
+	    	this.cockpit.socket.emit("/copterface",'move right');
 			cmd.action = 'right';
 	    } 
 	    
 	    followSpeed = ACCELERATION;
     }
     
-    console.log('face centerY: ' + faceCenterY);
-    console.log('canvas centerY: ' + centerY);
-    
     if(diffY > DIFFERENCE_LIMIT) {
 	    if(centerY > faceCenterY) {
-		  	console.log('move up');
+	    	this.cockpit.socket.emit("/copterface",'move up');
 		  	cmd.action = 'up';
 	    } else if(centerY < faceCenterY) {
-	    		console.log('move down');
+	    	this.cockpit.socket.emit("/copterface",'move down');
 	    		cmd.action = 'down';
 	    }
 	    
