@@ -3,6 +3,8 @@ var MIN_FACE_WIDTH = 150;
 var cv = require('opencv');
 var gm = require('gm');
 var imagick = require('imagemagick');
+var qr = require('qrcode.js');
+var png = require('pngjs').PNG;
 //var mailer = require("nodemailer");
 
 var fs    = require('fs')
@@ -38,6 +40,33 @@ function log(string) {
 
 var times = [];
 
+function detectQR(pngfile, cb) {
+    // Directions: This takes a pngfile, handles the PNG encoding, and detects the QR
+    // if you don't need this method to handle the conversion and whatnot of the PNG and its
+    // done outside of this scope, then you can get rid of most of this functionalty here
+    // and focus on the qr.detect method
+
+    // Have tested on a perfectly cropped QR code as well as a cellphone picture of a QR code
+    // on my laptop with stuff in the background
+    // Left usage commented out - most import bit is that we can get the X,Y coordinate points of the
+    // corner squares if we need
+    fs.createReadStream(pngfile)
+        .pipe(new png({filterType: 4}))
+        .on('parsed', function() {
+            var im = this;
+            im.getImageData = function(){ return {data: im.data}
+        };
+
+        qr.detect(im, function(err, data){
+            cb.apply(this, [data.data]);
+            // get data from QR
+            // console.log("!!",err, data.data);
+            // get some points/locations
+            //console.log(data.info.points[0].x, data.info.points[0].y);
+        });
+    });
+}
+
 function detectFaces() {
   if(tracking && (!processingImage) && lastPng) {
     processingImage = true;
@@ -57,6 +86,7 @@ function detectFaces() {
 //      	console.log("/copterface", "read image");
         // 2. Read picture (takes between 60 and 100 ms)
         cv.readImage( lastPng, function(err, im) {
+            im.save(saveImagePath);
           cb(err,im);
         });
       },
