@@ -63,7 +63,20 @@ function detectQRCode() {
                     im.save(saveImagePath);
 
                     try {
-                        detectQR(saveImagePath, cb);
+                        detectQR(saveImagePath, function(param) {
+                            var msg = param.message;
+                            var height = param.height;
+                            var width = param.width;
+                            var x = param.pos.x;
+                            var y = param.pos.y;
+                            console.log('msg: ' + msg);
+
+                            if(msg !== '') {
+                                io.sockets.emit('face', { x: x, y: y, w: width, h: height, iw: im.width(), ih: im.height(), user: msg, confidence: 100 });
+                            } else {
+                                io.sockets.emit('clear_face');
+                            }
+                        });
 //                        console.log(data);
                     } catch(err) {
 
@@ -82,9 +95,13 @@ function detectQRCode() {
             setTimeout(detectQRCode, dt);
         });
     } else {
-        if (tracking) setTimeout(detectFaces, DT);
+        if (tracking) setTimeout(detectQRCode, DT);
     };
 }
+
+//detectQR(myfile, function(param) {
+//    param.message;
+//})
 
 function detectQR(pngfile, cb) {
     // Directions: This takes a pngfile, handles the PNG encoding, and detects the QR
@@ -113,17 +130,25 @@ function detectQR(pngfile, cb) {
                 });
 
                 var ySorted = data.info.points.sort( function(a, b) {
-                    if (a.y > b.y) { return -1; } else { return 1; }
+                    if (a.y < b.y) { return -1; } else { return 1; }
                 });
 
                 var width = Math.abs(xSorted[1].x - xSorted[0].x);
                 var height = Math.abs(ySorted[2].y - ySorted[0].y);
-                var pos = { x: xSorted[0].x, y: ySorted[0].y };
+                var pos = { x: xSorted[0].x-width, y: ySorted[0].y };
+//                function(param) {
+//                    param.message;
+//
+//                    param.width
+//
+//                    param.pos.x
+//                }
                 cb.apply(this, [ { message: data.data, width: width, height: height, pos: pos }]);
             });
 
         } catch (e) {
-            console.log('nothings found');
+            console.log('nothing found');
+            io.sockets.emit('clear_face');
         }
     });
 }

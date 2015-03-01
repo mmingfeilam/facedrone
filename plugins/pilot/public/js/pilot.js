@@ -152,6 +152,12 @@ PILOT_ACCELERATION = 0.04;
                   ev.preventDefault();
                   return;
                 }
+
+                if (ev.keyCode == 112) {
+                    console.log('autonomous flight');
+                    return;
+                }
+
                 if (Keymap[ev.keyCode] == null) {
                         return;
                 }
