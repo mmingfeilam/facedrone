@@ -108,14 +108,20 @@ function detectQR(pngfile, cb) {
         try {
             console.log('looking for stuff');
             qr.detect(im, function(err, data){
-                cb.apply(this, [data.data]);
-                // get data from QR
+                var xSorted = data.info.points.sort( function(a, b) {
+                    if (a.x > b.x) { return -1; } else { return 1; }
+                });
 
-                console.log("!!",err, data.data);
-                //throw new Error(data.data);
-                // get some points/locations
-                console.log(data.info.points[0].x, data.info.points[0].y);
+                var ySorted = data.info.points.sort( function(a, b) {
+                    if (a.y > b.y) { return -1; } else { return 1; }
+                });
+
+                var width = Math.abs(xSorted[1].x - xSorted[0].x);
+                var height = Math.abs(ySorted[2].y - ySorted[0].y);
+                var pos = { x: xSorted[0].x, y: ySorted[0].y };
+                cb.apply(this, [ { message: data.data, width: width, height: height, pos: pos }]);
             });
+
         } catch (e) {
             console.log('nothings found');
         }
