@@ -84,7 +84,7 @@ PILOT_ACCELERATION = 0.04;
          * Constructuor
          */
         var Pilot = function Pilot(cockpit) {
-                console.log("Loading Pilot plugin.");
+//                console.log("Loading Pilot plugin.");
                 this.cockpit = cockpit;
                 this.speed = 0;
                 this.moving = false;
@@ -145,10 +145,10 @@ PILOT_ACCELERATION = 0.04;
          *
          */
         Pilot.prototype.keyDown = function keyDown(ev) {
-                console.log("Keydown: " + ev.keyCode);
+//                console.log("Keydown: " + ev.keyCode);
                 if (ev.keyCode == 9) {
                   PILOT_ACCELERATION = (PILOT_ACCELERATION == 0.04) ? 0.64 : 0.04;
-                  console.log("PILOT_ACCELERATION: " + PILOT_ACCELERATION);
+//                  console.log("PILOT_ACCELERATION: " + PILOT_ACCELERATION);
                   ev.preventDefault();
                   return;
                 }
@@ -162,7 +162,7 @@ PILOT_ACCELERATION = 0.04;
                 //if flip, determine which direction to flip
                 var regFlip = /^flip/;
                 if (regFlip.test(cmd.action)) {
-                  console.log("FLIP!");
+//                  console.log("FLIP!");
                   //check for which direction to flip
                   switch (this.moving) {
                     case 'front':
@@ -200,7 +200,7 @@ PILOT_ACCELERATION = 0.04;
          * and send a stop command for this direction
          */
         Pilot.prototype.keyUp = function keyUp(ev) {
-                console.log("Keyup: " + ev.keyCode);
+//                console.log("Keyup: " + ev.keyCode);
                 if (Keymap[ev.keyCode] == null) {
                         return;
                 }

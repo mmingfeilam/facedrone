@@ -38,6 +38,104 @@ function log(string) {
 
 var times = [];
 
+var UPC_SET = {
+        "3211": '0',
+        "2221": '1',
+        "2122": '2',
+        "1411": '3',
+        "1132": '4',
+        "1231": '5',
+        "1114": '6',
+        "1312": '7',
+        "1213": '8',
+        "3112": '9'
+    };
+
+function getBarcodeFromImage(face) {
+	var canvas = require('canvas'),
+	
+//	var ctx = $('#copterface').get(0).getContext('2d');
+//	var canvas = ctx.canvas;
+//	var img = new canvas.Image;
+//	img.src = saveImagePath;
+//    var doc = document,
+//        img = "object" == typeof imgOrId ? imgOrId : doc.getElementById(imgOrId),
+//        canvas = doc.createElement("canvas"),
+//        var width = face.width,
+//        height = face.height,
+        ctx = canvas.getContext("2d"),
+        spoints = [1, 9, 2, 8, 3, 7, 4, 6, 5],
+        numLines = spoints.length,
+        slineStep = height / (numLines + 1),
+        round = Math.round;
+//    canvas.width = width;
+//    canvas.height = height;
+//    ctx.drawImage(img, 0, 0);
+    
+    var image = fs.readFileSync(saveImagePath);
+    var width = image.width,
+    height = image.height;
+    
+    while(numLines--){
+        console.log(spoints[numLines]);
+        var pxLine = ctx.getImageData(0, slineStep * spoints[numLines], width, 2).data,
+            sum = [],
+            min = 0,
+            max = 0;
+        for(var row = 0; row < 2; row++){
+            for(var col = 0; col < width; col++){
+                var i = ((row * width) + col) * 4,
+                    g = ((pxLine[i] * 3) + (pxLine[i + 1] * 4) + (pxLine[i + 2] * 2)) / 9,
+                    s = sum[col];
+                pxLine[i] = pxLine[i + 1] = pxLine[i + 2] = g;
+                sum[col] = g + (undefined == s ? 0 : s);
+            }
+        }
+        for(var i = 0; i < width; i++){
+            var s = sum[i] = sum[i] / 2;
+            if(s < min){ min = s; }
+            if(s > max){ max = s; }
+        }
+        var pivot = min + ((max - min) / 2),
+            bmp = [];
+        for(var col = 0; col < width; col++){
+            var matches = 0;
+            for(var row = 0; row < 2; row++){
+                if(pxLine[((row * width) + col) * 4] > pivot){ matches++; }
+            }
+            bmp.push(matches > 1);
+        }
+        var curr = bmp[0],
+            count = 1,
+            lines = [];
+        for(var col = 0; col < width; col++){
+            if(bmp[col] == curr){ count++; }
+            else{
+                lines.push(count);
+                count = 1;
+                curr = bmp[col];
+            }
+        }
+        var code = '',
+            bar = ~~((lines[1] + lines[2] + lines[3]) / 3),
+            u = UPC_SET;
+        for(var i = 1, l = lines.length; i < l; i++){
+            if(code.length < 6){ var group = lines.slice(i * 4, (i * 4) + 4); }
+            else{ var group = lines.slice((i * 4 ) + 5, (i * 4) + 9); }
+            var digits = [
+                round(group[0] / bar),
+                round(group[1] / bar),
+                round(group[2] / bar),
+                round(group[3] / bar)
+            ];
+            code += u[digits.join('')] || u[digits.reverse().join('')] || 'X';
+            if(12 == code.length){ return code; break; }
+        }
+        if(-1 == code.indexOf('X')){ return code || false; }
+    }
+    return false;
+}
+
 function detectFaces() {
   if(tracking && (!processingImage) && lastPng) {
     processingImage = true;
@@ -60,6 +158,31 @@ function detectFaces() {
           cb(err,im);
         });
       },
+//	function(im, cb) {
+//	// console.log("/copterface", "face detect");
+//	// 3. Detect faces (takes between 200 and 250 ms)
+//		var opts = {};
+//		face_cascade.detectMultiScale(im, function(err, faces) {
+//			cb(err, faces, im);
+//		}, opts.scale, opts.neighbors, opts.min && opts.min[0],
+//				opts.min && opts.min[1]);
+//	},
+//      function(faces, im, cb) {
+//	      var face;
+//	      var biggestFace;
+//	      var dt = DT; // minimum time for the next detection
+//	
+//	      for(var k = 0; k < faces.length; k++) {
+//	        face = faces[k];
+//	        if( !biggestFace || biggestFace.width < face.width ) biggestFace = face;
+//	      }
+//		
+//    	  	im.save(saveImagePath);
+//    	  	var code = getBarcodeFromImage(face);
+//    	  	console.log('code: ' + code);
+//    	  	
+//      }
+      
       function(im, cb) {
 //      	console.log("/copterface", "face detect");
         // 3. Detect faces (takes between 200 and 250 ms)
@@ -113,9 +236,13 @@ function detectFaces() {
 //	      			trainingData.push([1,"/Users/212353126/Documents/Hack/Samples/yash" + i + ".jpg" ]);
 //	    		}
 	    		
-	    		for (var j = 1; j<10; j++){
-	      			trainingData.push([1,"/Users/212353126/Documents/Hack/Samples/lam" + j + ".jpg" ]);
-	    		}
+//	    		for (var j = 1; j<10; j++){
+//	      			trainingData.push([1,"/Users/212353126/Documents/Hack/Samples/lam" + j + ".jpg" ]);
+//	    		}
+	        
+	        for (var j = 1; j<30; j++){
+      			trainingData.push([1,"/Users/212353126/Documents/Hack/Samples/mikeLayer" + j + ".jpg" ]);
+    			}
 	    		
 //	    		for (var j = 1; j<10; j++){
 //	      			trainingData.push([1,"/Users/212353126/Documents/Hack/Samples/lam" + j + " copy.jpg" ]);
@@ -125,16 +252,20 @@ function detectFaces() {
 //	      			trainingData.push([1,"/Users/212353126/Documents/Hack/Samples/lam" + j + ".jpg" ]);
 //	    		}
 	    		
-	    		for (var j = 1; j<12; j++){
-	      			trainingData.push([2,"/Users/212353126/Documents/Hack/Samples/sean_" + j + "a.jpg" ]);
-	    		}
+//	    		for (var j = 1; j<12; j++){
+//	      			trainingData.push([2,"/Users/212353126/Documents/Hack/Samples/sean_" + j + "a.jpg" ]);
+//	    		}
+//	    		
+//	    		for (var j = 1; j<12; j++){
+//	      			trainingData.push([2,"/Users/212353126/Documents/Hack/Samples/sean_" + j + ".jpg" ]);
+//	    		}
+//	    		
+//	    		for (var j = 1; j<13; j++){
+//	      			trainingData.push([2,"/Users/212353126/Documents/Hack/Samples/sean_" + j + "b.jpg" ]);
+//	    		}
 	    		
-	    		for (var j = 1; j<12; j++){
-	      			trainingData.push([2,"/Users/212353126/Documents/Hack/Samples/sean_" + j + ".jpg" ]);
-	    		}
-	    		
-	    		for (var j = 1; j<13; j++){
-	      			trainingData.push([2,"/Users/212353126/Documents/Hack/Samples/sean_" + j + "b.jpg" ]);
+	    		for (var j = 1; j<30; j++){
+	      			trainingData.push([2,"/Users/212353126/Documents/Hack/Samples/SeanLayer" + j + ".jpg" ]);
 	    		}
 	    		
 //	    		for (var i = 1; i<7; i++){
@@ -158,11 +289,11 @@ function detectFaces() {
 	    			
 	    			if(confidenceLevel > 1500.0) {
 		    			switch(userId) {
-		    			case 2:
-		    				userName = "Sean";
-		    				break;
 		    			case 1:
 		    				userName = "Mike";
+		    				break;
+		    			case 2:
+		    				userName = "Sean";
 		    				break;
 		    			case 3:
 		    				userName = "Angelina";
@@ -172,11 +303,11 @@ function detectFaces() {
 		    				break;
 		    			}
 	    			}
-	    			console.log("test face recognition with live image: " + userName);
-	    			console.log("face.width: " + face.width);
-	    			console.log("face.height: " + face.height);
-	    			console.log("im.width(): " + im.width());
-	    			console.log("im.height(): " + im.height());
+//	    			console.log("test face recognition with live image: " + userName);
+//	    			console.log("face.width: " + face.width);
+//	    			console.log("face.height: " + face.height);
+//	    			console.log("im.width(): " + im.width());
+//	    			console.log("im.height(): " + im.height());
 	    		});
 	    		
           face = biggestFace;
@@ -218,12 +349,12 @@ function detectFaces() {
 
           var lim = 0.1;
           if( Math.abs( turnAmount ) > lim || Math.abs( heightAmount ) > lim ){
-            log( "  turning " + turnAmount );
+//            log( "  turning " + turnAmount );
             if (debug) io.sockets.emit('/message', 'turnAmount : ' + turnAmount);
             if( turnAmount < 0 ) client.clockwise( Math.abs( turnAmount ) );
             else client.counterClockwise( turnAmount );
 
-            log( "  going vertical " + heightAmount );
+//            log( "  going vertical " + heightAmount );
             if (debug) io.sockets.emit('/message', 'heightAmount : ' + heightAmount);
             if(  heightAmount < 0 ) client.down( Math.abs(heightAmount) );
             else client.up( heightAmount );
@@ -268,7 +399,7 @@ function copterface(name, deps) {
     io = deps.io;
     io.sockets.on('connection', function (socket) {
         socket.on('/copterface', function (cmd) {
-            console.log("copterface", cmd);
+//            console.log("copterface", cmd);
             if (cmd == "toggle") {
               client.stop(); // make sure to stop the helicopter if stop copterface
               tracking = tracking ? false : true;

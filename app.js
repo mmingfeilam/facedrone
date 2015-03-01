@@ -19,7 +19,8 @@ try {
 
 // Override the drone ip using an environment variable,
 // using the same convention as node-ar-drone
-var drone_ip = process.env.DEFAULT_DRONE_IP || '192.168.1.1';
+var drone_ip = process.env.DEFAULT_DRONE_IP || '192.168.43.148';
+console.log('drone ip: ' + process.env.DEFAULT_DRONE_IP);
 
 // Keep track of plugins js and css to load them in the view
 var scripts = []
