@@ -27,7 +27,7 @@ var transporter = nodemailer.createTransport({
     }
 });
 
-var dataMap = new Object(); // or var map = {};
+var dataMap = {};
 
 var DT = 150; // time between faces detection
 

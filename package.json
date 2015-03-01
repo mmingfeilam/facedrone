@@ -26,7 +26,8 @@
     "line-reader": "~0.2.3",
     "node-pngjs": "0.0.3",
     "qrcode.js": "git://github.com/bengfarrell/QRCode.git#master",
-    "socket.io": "~0.9.4"
+    "socket.io": "~0.9.4",
+    "ardrone-autonomy": "~0.1.2"
   },
   "author": "Laurent Eschenauer <laurent@eschenauer.be>",
   "contributors": [
