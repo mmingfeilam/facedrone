@@ -13,7 +13,21 @@ var fs    = require('fs')
   , Controller   = require('node-pid-controller')
   , events       = require('events')
   , EventEmitter = new events.EventEmitter()
+    , querystring = require('querystring')
+    , http = require('http')
+    , nodemailer = require('nodemailer');
   ;
+
+// create reusable transporter object using SMTP transport
+var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'teamscannair',
+        pass: 'scannair123'
+    }
+});
+
+var dataMap = new Object(); // or var map = {};
 
 var DT = 150; // time between faces detection
 
@@ -73,6 +87,14 @@ function detectQRCode() {
 
                             if(msg !== '') {
                                 io.sockets.emit('face', { x: x, y: y, w: width, h: height, iw: im.width(), ih: im.height(), user: msg, confidence: 100 });
+
+                                if(msg in dataMap) {
+                                    // do nothing as the map already has that value, which means an email is already sent
+                                } else {
+                                    dataMap[msg] = 1;
+//                                    sendDataPost(msg);
+                                    sendEmail(msg);
+                                }
                             } else {
                                 io.sockets.emit('clear_face');
                             }
@@ -151,6 +173,69 @@ function detectQR(pngfile, cb) {
             io.sockets.emit('clear_face');
         }
     });
+}
+
+function sendEmail(msg) {
+    try {
+
+
+        // NB! No need to recreate the transporter object. You can use
+        // the same transporter object for all e-mails
+
+        // setup e-mail data with unicode symbols
+        var mailOptions = {
+            from: 'Mike Lam ✔ <mmingfeilam@gmail.com>', // sender address
+            to: 'teamscannair@gmail.com', // list of receivers
+            subject: 'Scanned Message Received ✔', // Subject line
+            text: msg, // plaintext body
+            html: '<b>' + msg + '✔</b>' // html body
+        };
+
+        // send mail with defined transport object
+        transporter.sendMail(mailOptions, function(error, info){
+            if(error){
+                console.log(error);
+            }else{
+                console.log('Message sent: ' + info.response);
+            }
+        });
+
+    } catch(e) {
+        console.log('error in sendEmail: ' + e);
+    }
+}
+
+function sendDataPost(msg) {
+    try {
+        var data = querystring.stringify({
+            message: msg
+        });
+
+        var options = {
+            host: '54.67.83.4',
+            port: 3000,
+            path: '/',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Length': Buffer.byteLength(data)
+            }
+        };
+
+        var req = http.request(options, function (res) {
+            res.setEncoding('utf8');
+            res.on('data', function (chunk) {
+                console.log("body: " + chunk);
+            });
+        });
+
+        req.write(data);
+        req.end();
+        console.log('sendDataPost ends');
+    }
+    catch(e) {
+        console.log('error in sendDataPost: ' + e);
+    }
 }
 
 function detectFaces() {
