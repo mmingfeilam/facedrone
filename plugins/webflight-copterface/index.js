@@ -27,6 +27,9 @@ var transporter = nodemailer.createTransport({
     }
 });
 
+var autonomy = require('ardrone-autonomy');
+var mission  = autonomy.createMission();
+
 var dataMap = {};
 
 var DT = 150; // time between faces detection

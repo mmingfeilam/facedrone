@@ -155,59 +155,59 @@ PILOT_ACCELERATION = 0.04;
                   return;
                 }
 
-//                if (ev.keyCode == 112) {
-//                    console.log('autonomous flight');
-//                    mission.takeoff()
-////    .zero()       // Sets the current state as the reference
-//                        .hover(1000)
-//                        .altitude(1)  // Climb to altitude = 1 meter
-//                        .left(.5)
-//                        .hover(1000)
-////    .ccw(15)
-//                        .left(.5)
-//                        .hover(1000)
-////    .left(.25)
-////    .hover(1000)
-////    .left(.25)
-////    .hover(1000)
-////    .left(.25)
-////    .hover(1000)
-////    .ccw(15)
-////    .hover(1000)
-////    .right(.25)
-////    .hover(1000)
-////    .right(.25)
-////    .hover(1000)
-////    .right(.25)
-////    .hover(1000)
-////    .right(1)
-////    .hover(1000)
-////    .right(1)
-////    .hover(1000)
-////    .left(.25)
-////    .hover(1000)  // Hover in place for 1 second
-////    .left(.25)
-////    .hover(1000)
-////    .left(.25)
-////    .hover(1000)
-////    .left(.25)
-////    .left(.25)
-////    .left(.25)
-//                        .land();
-//
-//                    mission.run(function (err, result) {
-//                        if (err) {
-//                            console.trace("Oops, something bad happened: %s", err.message);
-//                            mission.client().stop();
-//                            mission.client().land();
-//                        } else {
-//                            console.log("Mission success!");
-//                            process.exit(0);
-//                        }
-//                    });
-//
-//                    return;
-//                }
+            if (ev.keyCode == 112) {
+                console.log('autonomous flight');
+                mission.takeoff()
+//    .zero()       // Sets the current state as the reference
+                    .hover(1000)
+                    .altitude(1)  // Climb to altitude = 1 meter
+                    .left(.5)
+                    .hover(1000)
+//    .ccw(15)
+                    .left(.5)
+                    .hover(1000)
+//    .left(.25)
+//    .hover(1000)
+//    .left(.25)
+//    .hover(1000)
+//    .left(.25)
+//    .hover(1000)
+//    .ccw(15)
+//    .hover(1000)
+//    .right(.25)
+//    .hover(1000)
+//    .right(.25)
+//    .hover(1000)
+//    .right(.25)
+//    .hover(1000)
+//    .right(1)
+//    .hover(1000)
+//    .right(1)
+//    .hover(1000)
+//    .left(.25)
+//    .hover(1000)  // Hover in place for 1 second
+//    .left(.25)
+//    .hover(1000)
+//    .left(.25)
+//    .hover(1000)
+//    .left(.25)
+//    .left(.25)
+//    .left(.25)
+                    .land();
+
+                mission.run(function (err, result) {
+                    if (err) {
+                        console.trace("Oops, something bad happened: %s", err.message);
+                        mission.client().stop();
+                        mission.client().land();
+                    } else {
+                        console.log("Mission success!");
+                        process.exit(0);
+                    }
+                });
+
+//          return;
+            }
 
                 if (Keymap[ev.keyCode] == null) {
                         return;

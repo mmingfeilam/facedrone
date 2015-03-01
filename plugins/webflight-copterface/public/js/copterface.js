@@ -44,7 +44,7 @@ var DIFFERENCE_LIMIT = 5;
   CF.prototype.keyPress = function(ev) {
 //    console.log("Keypress: " + ev.keyCode);
     // 'm'
-    if (ev.keyCode != 109) {
+    if (ev.keyCode != 120) {
       return;
     }
 
@@ -88,9 +88,9 @@ var DIFFERENCE_LIMIT = 5;
 //    this.cockpit.socket.emit("/copterface", userName);
     this.ctx.strokeStyle = 'red';
     this.ctx.font="50px Georgia";
-    this.cockpit.socket.emit("/copterface", "x: " + x);
-    this.cockpit.socket.emit("/copterface", "y: " + y);
-    this.cockpit.socket.emit("/copterface", "message: " + userName + " ");
+//    this.cockpit.socket.emit("/copterface", "x: " + x);
+//    this.cockpit.socket.emit("/copterface", "y: " + y);
+//    this.cockpit.socket.emit("/copterface", "message: " + userName + " ");
     this.ctx.strokeText(userName,x,y);
     
     this.ctx.restore();
@@ -107,10 +107,10 @@ var DIFFERENCE_LIMIT = 5;
 ////    this.cockpit.socket.emit("/copterface", 'canvas centerX: ' + centerX);
 ////    this.cockpit.socket.emit("/copterface", 'canvas centerY: ' + centerY);
 //    this.cockpit.socket.emit("/copterface", 'previous face width: ' + previousFaceWidth);
-    this.cockpit.socket.emit("/copterface", 'face width: ' + data.w);
-    this.cockpit.socket.emit("/copterface", 'face height: ' + data.h);
-    this.cockpit.socket.emit("/copterface", 'canvas width: ' + cw);
-    this.cockpit.socket.emit("/copterface", 'canvas height: ' + ch);
+//    this.cockpit.socket.emit("/copterface", 'face width: ' + data.w);
+//    this.cockpit.socket.emit("/copterface", 'face height: ' + data.h);
+//    this.cockpit.socket.emit("/copterface", 'canvas width: ' + cw);
+//    this.cockpit.socket.emit("/copterface", 'canvas height: ' + ch);
 //
 //    var cmd = {};
 //    cmd.ev = 'move';
