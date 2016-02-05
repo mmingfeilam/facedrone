@@ -13,6 +13,9 @@ var client
   , recording = false
   ;
 
+var autonomy = require('../../node_modules/ardrone-autonomy');
+var mission  = autonomy.createMission();
+
 function blackbox(name, deps) {
 
     client = deps.client;
